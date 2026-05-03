@@ -1,6 +1,6 @@
 import sys
 
-from youth_migration.exception import YouthMigrationException
+from youth_migration.exception import CustomException
 from youth_migration.logger import logging
 
 from youth_migration.components.data_ingestion import DataIngestion
@@ -16,7 +16,7 @@ from youth_migration.entity.config_entity import (
     DataTransformationConfig,
     ModelTrainerConfig,
     ModelEvaluationConfig,
-    ModelPusherConfig,
+    ModelPusherConfig
 )
 
 from youth_migration.entity.artifact_entity import (
@@ -25,7 +25,7 @@ from youth_migration.entity.artifact_entity import (
     DataTransformationArtifact,
     ModelTrainerArtifact,
     ModelEvaluationArtifact,
-    ModelPusherArtifact,
+    ModelPusherArtifact
 )
 
 
@@ -38,6 +38,10 @@ class TrainingPipeline:
         self.model_evaluation_config = ModelEvaluationConfig()
         self.model_pusher_config = ModelPusherConfig()
 
+
+    # -------------------------------
+    # Data Ingestion
+    # -------------------------------
     def start_data_ingestion(self) -> DataIngestionArtifact:
         try:
             logging.info("Starting Data Ingestion")
@@ -46,136 +50,186 @@ class TrainingPipeline:
                 data_ingestion_config=self.data_ingestion_config
             )
 
-            artifact = data_ingestion.initiate_data_ingestion()
+            data_ingestion_artifact = data_ingestion.initiate_data_ingestion()
 
             logging.info("Data Ingestion Completed")
-            return artifact
+
+            return data_ingestion_artifact
 
         except Exception as e:
-            raise YouthMigrationException(e, sys)
+            raise CustomException(e, sys)
 
+
+    # -------------------------------
+    # Data Validation
+    # -------------------------------
     def start_data_validation(
-        self, data_ingestion_artifact: DataIngestionArtifact
+        self,
+        data_ingestion_artifact: DataIngestionArtifact
     ) -> DataValidationArtifact:
+
         try:
             logging.info("Starting Data Validation")
 
             data_validation = DataValidation(
                 data_ingestion_artifact=data_ingestion_artifact,
-                data_validation_config=self.data_validation_config,
+                data_validation_config=self.data_validation_config
             )
 
-            artifact = data_validation.initiate_data_validation()
+            data_validation_artifact = data_validation.initiate_data_validation()
 
             logging.info("Data Validation Completed")
-            return artifact
+
+            return data_validation_artifact
 
         except Exception as e:
-            raise YouthMigrationException(e, sys)
+            raise CustomException(e, sys)
 
+
+    # -------------------------------
+    # Data Transformation
+    # -------------------------------
     def start_data_transformation(
         self,
         data_ingestion_artifact: DataIngestionArtifact,
-        data_validation_artifact: DataValidationArtifact,
+        data_validation_artifact: DataValidationArtifact
     ) -> DataTransformationArtifact:
+
         try:
             logging.info("Starting Data Transformation")
 
             data_transformation = DataTransformation(
                 data_ingestion_artifact=data_ingestion_artifact,
-                data_validation_artifact=data_validation_artifact,
                 data_transformation_config=self.data_transformation_config,
+                data_validation_artifact=data_validation_artifact
             )
 
-            artifact = data_transformation.initiate_data_transformation()
+            data_transformation_artifact = data_transformation.initiate_data_transformation()
 
             logging.info("Data Transformation Completed")
-            return artifact
+
+            return data_transformation_artifact
 
         except Exception as e:
-            raise YouthMigrationException(e, sys)
+            raise CustomException(e, sys)
 
+
+    # -------------------------------
+    # Model Trainer
+    # -------------------------------
     def start_model_trainer(
-        self, data_transformation_artifact: DataTransformationArtifact
+        self,
+        data_transformation_artifact: DataTransformationArtifact
     ) -> ModelTrainerArtifact:
+
         try:
             logging.info("Starting Model Training")
 
             model_trainer = ModelTrainer(
                 data_transformation_artifact=data_transformation_artifact,
-                model_trainer_config=self.model_trainer_config,
+                model_trainer_config=self.model_trainer_config
             )
 
-            artifact = model_trainer.initiate_model_trainer()
+            model_trainer_artifact = model_trainer.initiate_model_trainer()
 
             logging.info("Model Training Completed")
-            return artifact
+
+            return model_trainer_artifact
 
         except Exception as e:
-            raise YouthMigrationException(e, sys)
+            raise CustomException(e, sys)
 
+
+    # -------------------------------
+    # Model Evaluation
+    # -------------------------------
     def start_model_evaluation(
         self,
         data_ingestion_artifact: DataIngestionArtifact,
-        model_trainer_artifact: ModelTrainerArtifact,
+        model_trainer_artifact: ModelTrainerArtifact
     ) -> ModelEvaluationArtifact:
+
         try:
             logging.info("Starting Model Evaluation")
 
             model_evaluation = ModelEvaluation(
                 model_eval_config=self.model_evaluation_config,
                 data_ingestion_artifact=data_ingestion_artifact,
-                model_trainer_artifact=model_trainer_artifact,
+                model_trainer_artifact=model_trainer_artifact
             )
 
-            artifact = model_evaluation.initiate_model_evaluation()
+            model_evaluation_artifact = model_evaluation.initiate_model_evaluation()
 
             logging.info("Model Evaluation Completed")
-            return artifact
+
+            return model_evaluation_artifact
 
         except Exception as e:
-            raise YouthMigrationException(e, sys)
+            raise CustomException(e, sys)
 
+
+    # -------------------------------
+    # Model Pusher
+    # -------------------------------
     def start_model_pusher(
-        self, model_evaluation_artifact: ModelEvaluationArtifact
+        self,
+        model_evaluation_artifact: ModelEvaluationArtifact
     ) -> ModelPusherArtifact:
+
         try:
-            logging.info("Starting Model Pusher")
+            logging.info("Starting Model Pushing")
 
             model_pusher = ModelPusher(
                 model_evaluation_artifact=model_evaluation_artifact,
-                model_pusher_config=self.model_pusher_config,
+                model_pusher_config=self.model_pusher_config
             )
 
-            artifact = model_pusher.initiate_model_pusher()
+            model_pusher_artifact = model_pusher.initiate_model_pusher()
 
-            logging.info("Model Pusher Completed")
-            return artifact
+            logging.info("Model Pushing Completed")
+
+            return model_pusher_artifact
 
         except Exception as e:
-            raise YouthMigrationException(e, sys)
+            raise CustomException(e, sys)
 
+
+    # -------------------------------
+    # Run Full Pipeline
+    # -------------------------------
     def run_pipeline(self) -> None:
         try:
-            logging.info("Pipeline Started")
+            logging.info("Pipeline started")
 
-            ingestion_artifact = self.start_data_ingestion()
-            validation_artifact = self.start_data_validation(ingestion_artifact)
-            transformation_artifact = self.start_data_transformation(
-                ingestion_artifact, validation_artifact
-            )
-            trainer_artifact = self.start_model_trainer(transformation_artifact)
-            evaluation_artifact = self.start_model_evaluation(
-                ingestion_artifact, trainer_artifact
+            data_ingestion_artifact = self.start_data_ingestion()
+
+            data_validation_artifact = self.start_data_validation(
+                data_ingestion_artifact=data_ingestion_artifact
             )
 
-            if not evaluation_artifact.is_model_accepted:
+            data_transformation_artifact = self.start_data_transformation(
+                data_ingestion_artifact=data_ingestion_artifact,
+                data_validation_artifact=data_validation_artifact
+            )
+
+            model_trainer_artifact = self.start_model_trainer(
+                data_transformation_artifact=data_transformation_artifact
+            )
+
+            model_evaluation_artifact = self.start_model_evaluation(
+                data_ingestion_artifact=data_ingestion_artifact,
+                model_trainer_artifact=model_trainer_artifact
+            )
+
+            if not model_evaluation_artifact.is_model_accepted:
                 logging.info("Model not accepted. Stopping pipeline.")
                 return
 
-            self.start_model_pusher(evaluation_artifact)
+            self.start_model_pusher(
+                model_evaluation_artifact=model_evaluation_artifact
+            )
 
-            logging.info("Pipeline Completed Successfully")
+            logging.info("Pipeline completed successfully")
 
         except Exception as e:
-            raise YouthMigrationException(e, sys)
+            raise CustomException(e, sys)

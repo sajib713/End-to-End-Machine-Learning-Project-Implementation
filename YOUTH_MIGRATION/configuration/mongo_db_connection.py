@@ -2,46 +2,44 @@ import sys
 import os
 import pymongo
 import certifi
+from dotenv import load_dotenv
 
-from youth_migration.exception import YouthMigrationException
+load_dotenv()
+
+from youth_migration.exception import CustomException
 from youth_migration.logger import logging
 from youth_migration.constants import DATABASE_NAME, MONGODB_URL_KEY
 
-ca = certifi.where()
-
 
 class MongoDBClient:
-    """
-    MongoDB Client for establishing connection
-
-    Returns:
-        MongoDB database connection
-    """
 
     client = None
 
-    def __init__(self, database_name: str = DATABASE_NAME) -> None:
+    def __init__(self, database_name=DATABASE_NAME) -> None:
         try:
             if MongoDBClient.client is None:
                 mongo_db_url = os.getenv(MONGODB_URL_KEY)
 
-                if mongo_db_url is None:
-                    raise ValueError(
-                        f"Environment variable '{MONGODB_URL_KEY}' is not set."
-                    )
+                if not mongo_db_url:
+                    raise Exception(f"{MONGODB_URL_KEY} not found in environment")
+
+                ca = certifi.where()
 
                 MongoDBClient.client = pymongo.MongoClient(
                     mongo_db_url,
-                    tlsCAFile=ca
+                    tls=True,
+                    tlsCAFile=ca,
+                    serverSelectionTimeoutMS=10000
                 )
 
-                logging.info("MongoDB client created successfully")
+                # 🔥 test connection
+                MongoDBClient.client.admin.command("ping")
 
             self.client = MongoDBClient.client
             self.database = self.client[database_name]
-            self.database_name = database_name
 
-            logging.info(f"Connected to database: {database_name}")
+            logging.info("MongoDB connected successfully")
 
         except Exception as e:
-            raise YouthMigrationException(e, sys)
+            logging.error(f"MongoDB error: {e}")
+            raise CustomException(e, sys)

@@ -1,67 +1,55 @@
-import sys
-import pandas as pd
-import numpy as np
-from typing import Optional
-
 from youth_migration.configuration.mongo_db_connection import MongoDBClient
 from youth_migration.constants import DATABASE_NAME
-from youth_migration.exception import YouthMigrationException
-from youth_migration.logger import logging
+from youth_migration.exception import CustomException
+
+import pandas as pd
+import sys
+import numpy as np
+from typing import Optional
 
 
 class YouthMigrationData:
     """
-    This class helps to export MongoDB collection as pandas DataFrame
+    MongoDB collection → Pandas DataFrame convert করার জন্য class
     """
 
     def __init__(self):
         try:
             self.mongo_client = MongoDBClient(database_name=DATABASE_NAME)
         except Exception as e:
-            raise YouthMigrationException(e, sys)
+            raise CustomException(e, sys)
 
     def export_collection_as_dataframe(
         self,
         collection_name: str,
         database_name: Optional[str] = None
     ) -> pd.DataFrame:
-        """
-        Export entire collection as DataFrame
-
-        Args:
-            collection_name (str): MongoDB collection name
-            database_name (Optional[str]): Optional DB override
-
-        Returns:
-            pd.DataFrame
-        """
         try:
-            # Select database
+            # -------------------------------
+            # Collection select
+            # -------------------------------
             if database_name is None:
-                db = self.mongo_client.database
+                collection = self.mongo_client.database[collection_name]
             else:
-                db = self.mongo_client.client[database_name]
+                collection = self.mongo_client.client[database_name][collection_name]
 
-            collection = db[collection_name]
-
-            logging.info(f"Exporting collection: {collection_name}")
-
+            # -------------------------------
+            # Convert to DataFrame
+            # -------------------------------
             df = pd.DataFrame(list(collection.find()))
 
-            if df.empty:
-                logging.warning(f"No data found in collection: {collection_name}")
-
-            # Drop MongoDB internal id
+            # -------------------------------
+            # Drop MongoDB _id
+            # -------------------------------
             if "_id" in df.columns:
-                df.drop(columns=["_id"], inplace=True)
+                df.drop(columns=["_id"], axis=1, inplace=True)
 
-            # Replace "na" with np.nan
+            # -------------------------------
+            # Replace 'na' → np.nan
+            # -------------------------------
             df.replace({"na": np.nan}, inplace=True)
-
-            logging.info(f"Data exported successfully. Shape: {df.shape}")
 
             return df
 
         except Exception as e:
-            logging.error("Error while exporting data", exc_info=True)
-            raise YouthMigrationException(e, sys)
+            raise CustomException(e, sys)
