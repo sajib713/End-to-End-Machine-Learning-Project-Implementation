@@ -16,7 +16,7 @@ class ModelTrainer:
         try:
             logging.info("Model training started (dummy)")
 
-            # ⚠️ dummy model path (temporary)
+            #  dummy model path (temporary)
             trained_model_file_path = "artifact/model.pkl"
 
             metric_artifact = ClassificationMetricArtifact(
