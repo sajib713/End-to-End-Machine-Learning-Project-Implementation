@@ -1,13 +1,10 @@
 import sys
-import os
 import numpy as np
 import pandas as pd
 
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder, PowerTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
-
-from imblearn.combine import SMOTEENN
 
 from youth_migration.exception import CustomException
 from youth_migration.logger import logging
@@ -18,134 +15,123 @@ from youth_migration.utils.main_utils import (
     drop_columns
 )
 
-from youth_migration.entity.config_entity import DataTransformationConfig
 from youth_migration.entity.artifact_entity import (
     DataTransformationArtifact,
     DataIngestionArtifact,
     DataValidationArtifact
 )
 
-from youth_migration.constants import SCHEMA_FILE_PATH, CURRENT_YEAR
+from youth_migration.constants import SCHEMA_FILE_PATH
 
 
 class DataTransformation:
     def __init__(
         self,
         data_ingestion_artifact: DataIngestionArtifact,
-        data_transformation_config: DataTransformationConfig,
+        data_transformation_config,
         data_validation_artifact: DataValidationArtifact
     ):
-        try:
-            self.data_ingestion_artifact = data_ingestion_artifact
-            self.data_transformation_config = data_transformation_config
-            self.data_validation_artifact = data_validation_artifact
-            self._schema_config = read_yaml_file(SCHEMA_FILE_PATH)
-
-        except Exception as e:
-            raise CustomException(e, sys)
+        self.data_ingestion_artifact = data_ingestion_artifact
+        self.data_transformation_config = data_transformation_config
+        self.data_validation_artifact = data_validation_artifact
+        self._schema_config = read_yaml_file(SCHEMA_FILE_PATH)
 
     @staticmethod
     def read_data(file_path):
-        try:
-            return pd.read_csv(file_path)
-        except Exception as e:
-            raise CustomException(e, sys)
+        return pd.read_csv(file_path)
 
     # -------------------------------
     # Preprocessor
     # -------------------------------
-    def get_data_transformer_object(self):
+    def get_data_transformer_object(self, X_train):
+        num_features = [col.strip().lower() for col in self._schema_config["numerical_columns"]]
+        cat_features = [col.strip().lower() for col in self._schema_config["categorical_columns"]]
 
-        try:
-            logging.info("Creating preprocessing pipeline")
+        num_features = [col for col in num_features if col in X_train.columns]
+        cat_features = [col for col in cat_features if col in X_train.columns]
 
-            oh_columns = self._schema_config['oh_columns']
-            or_columns = self._schema_config['or_columns']
-            num_features = self._schema_config['num_features']
-            transform_columns = self._schema_config['transform_columns']
+        num_features = [col for col in num_features if col not in cat_features]
 
-            # pipelines
-            numeric_pipeline = Pipeline([
-                ("scaler", StandardScaler())
-            ])
+        numeric_pipeline = Pipeline([
+            ("scaler", StandardScaler())
+        ])
 
-            oh_pipeline = Pipeline([
-                ("onehot", OneHotEncoder(handle_unknown="ignore"))
-            ])
+        categorical_pipeline = Pipeline([
+            ("onehot", OneHotEncoder(handle_unknown="ignore"))
+        ])
 
-            ordinal_pipeline = Pipeline([
-                ("ordinal", OrdinalEncoder())
-            ])
+        preprocessor = ColumnTransformer([
+            ("num", numeric_pipeline, num_features),
+            ("cat", categorical_pipeline, cat_features)
+        ])
 
-            transform_pipeline = Pipeline([
-                ("power", PowerTransformer(method="yeo-johnson"))
-            ])
-
-            preprocessor = ColumnTransformer([
-                ("onehot", oh_pipeline, oh_columns),
-                ("ordinal", ordinal_pipeline, or_columns),
-                ("transform", transform_pipeline, transform_columns),
-                ("numeric", numeric_pipeline, num_features)
-            ])
-
-            return preprocessor
-
-        except Exception as e:
-            raise CustomException(e, sys)
+        return preprocessor
 
     # -------------------------------
     # Main function
     # -------------------------------
-    def initiate_data_transformation(self) -> DataTransformationArtifact:
+    def initiate_data_transformation(self):
 
         try:
-            if not self.data_validation_artifact.validation_status:
-                raise Exception(self.data_validation_artifact.message)
-
             logging.info("Starting data transformation")
 
             train_df = self.read_data(self.data_ingestion_artifact.train_file_path)
             test_df = self.read_data(self.data_ingestion_artifact.test_file_path)
 
-            target_column = "case_status"
+            # normalize columns
+            train_df.columns = train_df.columns.str.strip().str.lower()
+            test_df.columns = test_df.columns.str.strip().str.lower()
 
-            # split
+            target_column = self._schema_config["target_column"]
+
             X_train = train_df.drop(columns=[target_column])
             y_train = train_df[target_column]
 
             X_test = test_df.drop(columns=[target_column])
             y_test = test_df[target_column]
 
-            #  feature engineering
-            X_train["company_age"] = CURRENT_YEAR - X_train["yr_of_estab"]
-            X_test["company_age"] = CURRENT_YEAR - X_test["yr_of_estab"]
-
-            # drop columns
+            # drop unwanted
             drop_cols = self._schema_config["drop_columns"]
             X_train = drop_columns(X_train, drop_cols)
             X_test = drop_columns(X_test, drop_cols)
 
-            #  target encoding (simple)
-            y_train = y_train.map({"Approved": 1, "Denied": 0})
-            y_test = y_test.map({"Approved": 1, "Denied": 0})
+            # 🔥 ALIGN columns
+            X_test = X_test.reindex(columns=X_train.columns, fill_value="unknown")
+
+            # 🔥 CLEAN TARGET (IMPORTANT FIX)
+            y_train = y_train.astype(str).str.strip().str.lower()
+            y_test = y_test.astype(str).str.strip().str.lower()
+
+            # replace invalid values safely
+            y_train = y_train.replace({"yes": 1, "no": 0})
+            y_test = y_test.replace({"yes": 1, "no": 0})
+
+            # 🔥 fill invalid with most frequent
+            y_train = pd.to_numeric(y_train, errors="coerce")
+            y_test = pd.to_numeric(y_test, errors="coerce")
+
+            y_train = y_train.fillna(y_train.mode()[0])
+            y_test = y_test.fillna(y_test.mode()[0])
 
             # preprocessing
-            preprocessor = self.get_data_transformer_object()
+            preprocessor = self.get_data_transformer_object(X_train)
 
             X_train_arr = preprocessor.fit_transform(X_train)
             X_test_arr = preprocessor.transform(X_test)
 
-            #  SMOTE only on TRAIN (IMPORTANT FIX)
-            smote = SMOTEENN(sampling_strategy="minority")
+            # convert sparse to dense
+            if hasattr(X_train_arr, "toarray"):
+                X_train_arr = X_train_arr.toarray()
+            if hasattr(X_test_arr, "toarray"):
+                X_test_arr = X_test_arr.toarray()
 
-            X_train_final, y_train_final = smote.fit_resample(X_train_arr, y_train)
-
-            #  test set-এ SMOTE দিবে না
-            X_test_final, y_test_final = X_test_arr, y_test
+            # reshape
+            y_train_arr = np.array(y_train).reshape(-1, 1)
+            y_test_arr = np.array(y_test).reshape(-1, 1)
 
             # combine
-            train_arr = np.c_[X_train_final, np.array(y_train_final)]
-            test_arr = np.c_[X_test_final, np.array(y_test_final)]
+            train_arr = np.hstack((X_train_arr, y_train_arr))
+            test_arr = np.hstack((X_test_arr, y_test_arr))
 
             # save
             save_object(

@@ -18,6 +18,7 @@ class MigrationData:
         gender,
         occupation,
         family_abroad,
+        stay_duration,
         aware_programs,
         migration_trend,
         return_plan,
@@ -25,14 +26,13 @@ class MigrationData:
         govt_support,
         responsibility,
         recommend_score,
-        stress_score,
-        country_count
     ):
         try:
             self.age = age
             self.gender = gender
             self.occupation = occupation
             self.family_abroad = family_abroad
+            self.stay_duration = stay_duration
             self.aware_programs = aware_programs
             self.migration_trend = migration_trend
             self.return_plan = return_plan
@@ -40,8 +40,6 @@ class MigrationData:
             self.govt_support = govt_support
             self.responsibility = responsibility
             self.recommend_score = recommend_score
-            self.stress_score = stress_score
-            self.country_count = country_count
 
         except Exception as e:
             raise CustomException(e, sys)
@@ -49,19 +47,25 @@ class MigrationData:
     def get_data_as_dict(self):
         try:
             return {
-                "What is your age?": [self.age],
-                "What is your gender?": [self.gender],
-                "What is your occupation?": [self.occupation],
-                "Does any member of your family or a close acquaintance live abroad?": [self.family_abroad],
-                "Are you aware of any specific migration programs or scholarships available for students or workers abroad?": [self.aware_programs],
-                "Do you think migration trends have increased among Bangladeshi youth in the last 5 years?": [self.migration_trend],
-                "Do you think you will return to Bangladesh in the future after living abroad?": [self.return_plan],
-                "Do you think your decision to move abroad will impact your family or community in Bangladesh?": [self.family_impact],
-                "Do you feel that the government of Bangladesh offers enough support for youth planning to migrate abroad?": [self.govt_support],
-                "Do you feel a sense of responsibility towards your family while planning to move abroad?": [self.responsibility],
-                "recommend_score": [self.recommend_score],
-                "stress_score": [self.stress_score],
-                "country_count": [self.country_count]
+                "what is your age?": [self.age],
+                "what is your gender?": [self.gender],
+                "what is your occupation?": [self.occupation],
+                "does any member of your family or a close acquaintance live abroad?": [self.family_abroad],
+                "how long do you plan to stay abroad?": [self.stay_duration],
+                "are you aware of any specific migration programs or scholarships available for students or workers abroad?": [self.aware_programs],
+                "what role do social media and online success stories play in influencing your decision to move abroad?": ["medium"],
+                "who or what influences your decision to move abroad? (multiple options can be selected)": ["family"],
+                "which countries are you most interested in moving to?": ["canada"],
+                "how much psychological stress or anxiety have you experienced while considering moving abroad?": ["medium"],
+                "what is your primary goal for considering moving abroad? (multiple options can be selected)": ["education"],
+                "what kind of psychological stress have you experienced while planning to move abroad? (multiple options can be selected)": ["financial"],
+                "how do you cope with the stress of planning to move abroad?": ["family"],
+                "do you think migration trends have increased among bangladeshi youth in the last 5 years?": [self.migration_trend],
+                "do you think you will return to bangladesh in the future after living abroad?": [self.return_plan],
+                "do you think your decision to move abroad will impact your family or community in bangladesh?": [self.family_impact],
+                "do you feel that the government of bangladesh offers enough support for youth planning to migrate abroad?": [self.govt_support],
+                "do you feel a sense of responsibility towards your family while planning to move abroad?": [self.responsibility],
+                "how likely are you to recommend going abroad to others in your age group? (rate on a scale of 1 to 5, where 1 is very unlikely and 5 is very likely).": [self.recommend_score],
             }
 
         except Exception as e:
@@ -69,7 +73,13 @@ class MigrationData:
 
     def get_input_dataframe(self) -> DataFrame:
         try:
-            return pd.DataFrame(self.get_data_as_dict())
+            df = pd.DataFrame(self.get_data_as_dict())
+
+            # 🔥 IMPORTANT: normalize column names same as training
+            df.columns = df.columns.str.strip().str.lower()
+
+            return df
+
         except Exception as e:
             raise CustomException(e, sys)
 

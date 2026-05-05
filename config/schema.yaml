@@ -1,57 +1,53 @@
 columns:
-  case_id: category
-  continent: category
-  education_of_employee: category
-  has_job_experience: category
-  requires_job_training: category
-  no_of_employees: int
-  yr_of_estab: int
-  region_of_employment: category
-  prevailing_wage: int
-  unit_of_wage: category
-  full_time_position: category
-  case_status: category
+  what is your age?: category
+  what is your gender?: category
+  what is your occupation?: category
+  does any member of your family or a close acquaintance live abroad?: category
+  have you decided to move abroad?: category
+  how long do you plan to stay abroad?: category
+  are you aware of any specific migration programs or scholarships available for students or workers abroad?: category
+  what role do social media and online success stories play in influencing your decision to move abroad?: category
+  who or what influences your decision to move abroad? (multiple options can be selected): category
+  which countries are you most interested in moving to?: category
+  how much psychological stress or anxiety have you experienced while considering moving abroad?: category
+  what is your primary goal for considering moving abroad? (multiple options can be selected): category
+  what kind of psychological stress have you experienced while planning to move abroad? (multiple options can be selected): category
+  how do you cope with the stress of planning to move abroad?: category
+  do you think migration trends have increased among bangladeshi youth in the last 5 years?: category
+  what do you think is the biggest barrier to migrating abroad? (multiple options can be selected): category
+  do you think you will return to bangladesh in the future after living abroad?: category
+  do you think your decision to move abroad will impact your family or community in bangladesh?: category
+  do you feel that the government of bangladesh offers enough support for youth planning to migrate abroad?: category
+  do you feel a sense of responsibility towards your family while planning to move abroad?: category
+  how likely are you to recommend going abroad to others in your age group? (rate on a scale of 1 to 5, where 1 is very unlikely and 5 is very likely).: int
 
 numerical_columns:
-  - no_of_employees
-  - prevailing_wage
-  - yr_of_estab
+  - what is your age?
+  - how likely are you to recommend going abroad to others in your age group? (rate on a scale of 1 to 5, where 1 is very unlikely and 5 is very likely).
 
 categorical_columns:
-  - case_id
-  - continent
-  - education_of_employee
-  - has_job_experience
-  - requires_job_training
-  - region_of_employment
-  - unit_of_wage
-  - full_time_position
-  - case_status
+  - what is your age?
+  - what is your gender?
+  - what is your occupation?
+  - does any member of your family or a close acquaintance live abroad?
+  - how long do you plan to stay abroad?
+  - are you aware of any specific migration programs or scholarships available for students or workers abroad?
+  - what role do social media and online success stories play in influencing your decision to move abroad?
+  - who or what influences your decision to move abroad? (multiple options can be selected)
+  - which countries are you most interested in moving to?
+  - how much psychological stress or anxiety have you experienced while considering moving abroad?
+  - what is your primary goal for considering moving abroad? (multiple options can be selected)
+  - what kind of psychological stress have you experienced while planning to move abroad? (multiple options can be selected)
+  - how do you cope with the stress of planning to move abroad?
+  - do you think migration trends have increased among bangladeshi youth in the last 5 years?
+  - what do you think is the biggest barrier to migrating abroad? (multiple options can be selected)
+  - do you think you will return to bangladesh in the future after living abroad?
+  - do you think your decision to move abroad will impact your family or community in bangladesh?
+  - do you feel that the government of bangladesh offers enough support for youth planning to migrate abroad?
+  - do you feel a sense of responsibility towards your family while planning to move abroad?
 
-# 🔥 FIXED
 drop_columns:
-  - case_id   # শুধু এটুকু রাখো
+  - timestamp
 
-# -------------------------------
-# Data Transformation
-# -------------------------------
-
-num_features:
-  - no_of_employees
-  - prevailing_wage
-  - company_age
-
-or_columns:
-  - has_job_experience
-  - requires_job_training
-  - full_time_position
-  - education_of_employee
-
-oh_columns:
-  - continent
-  - unit_of_wage
-  - region_of_employment
-
-transform_columns:
-  - no_of_employees
-  - company_age
+target_column: have you decided to move abroad?
+drift_threshold: 0.1

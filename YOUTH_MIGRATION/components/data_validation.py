@@ -1,180 +1,163 @@
 import os
 import sys
-import json
+import re
 import pandas as pd
-from pandas import DataFrame
+from pandas.api.types import is_numeric_dtype
 
 from youth_migration.exception import CustomException
 from youth_migration.logger import logging
 from youth_migration.utils.main_utils import read_yaml_file, write_yaml_file
-from youth_migration.entity.artifact_entity import (
-    DataIngestionArtifact,
-    DataValidationArtifact
-)
-from youth_migration.entity.config_entity import DataValidationConfig
+from youth_migration.entity.artifact_entity import DataValidationArtifact
 from youth_migration.constants import SCHEMA_FILE_PATH
 
 
 class DataValidation:
-    def __init__(
-        self,
-        data_ingestion_artifact: DataIngestionArtifact,
-        data_validation_config: DataValidationConfig
-    ):
+
+    def __init__(self, data_ingestion_artifact, data_validation_config):
+        self.data_ingestion_artifact = data_ingestion_artifact
+        self.data_validation_config = data_validation_config
+        self._schema_config = read_yaml_file(SCHEMA_FILE_PATH)
+
+    # -------------------------------
+    # Normalize Column
+    # -------------------------------
+    def normalize(self, col):
+        col = col.strip().lower()
+        col = re.sub(r"\s+", " ", col)
+        col = col.replace(":", "").replace("?", "")
+        return col
+
+    # -------------------------------
+    # Read Data
+    # -------------------------------
+    def read_data(self, path):
+        return pd.read_csv(path)
+
+    # -------------------------------
+    # Column Validation
+    # -------------------------------
+    def validate_columns(self, df):
+        expected = set(self.normalize(c) for c in self._schema_config["columns"].keys())
+        actual = set(self.normalize(c) for c in df.columns)
+
+        missing = expected - actual
+        extra = actual - expected
+
+        if missing:
+            logging.error(f"Missing Columns: {missing}")
+
+        if extra:
+            logging.warning(f"Extra Columns: {extra}")
+
+        return len(missing) == 0
+
+    # -------------------------------
+    # Data Type Validation
+    # -------------------------------
+    def validate_dtypes(self, df):
+        schema = self._schema_config["columns"]
+
+        for col, dtype in schema.items():
+            for df_col in df.columns:
+                if self.normalize(df_col) == self.normalize(col):
+                    if dtype == "int" and not is_numeric_dtype(df[df_col]):
+                        logging.error(f"{col} should be numeric")
+                        return False
+
+        return True
+
+    # -------------------------------
+    # Dataset Drift
+    # -------------------------------
+    def detect_drift(self, train, test):
+        report = {}
+        threshold = self._schema_config.get("drift_threshold", 0.1)
+
+        for col in train.columns:
+            if col in test.columns and is_numeric_dtype(train[col]):
+                diff = abs(train[col].mean() - test[col].mean())
+                report[col] = float(diff)
+
+        os.makedirs(
+            os.path.dirname(self.data_validation_config.drift_report_file_path),
+            exist_ok=True
+        )
+
+        write_yaml_file(
+            self.data_validation_config.drift_report_file_path,
+            report
+        )
+
+        return any(v > threshold for v in report.values())
+
+    # -------------------------------
+    # Main Validation
+    # -------------------------------
+    def initiate_data_validation(self):
+
         try:
-            self.data_ingestion_artifact = data_ingestion_artifact
-            self.data_validation_config = data_validation_config
-            self._schema_config = read_yaml_file(file_path=SCHEMA_FILE_PATH)
-        except Exception as e:
-            raise CustomException(e, sys)
+            logging.info("Starting Data Validation")
 
-    # -------------------------------
-    # Read CSV
-    # -------------------------------
-    @staticmethod
-    def read_data(file_path) -> DataFrame:
-        try:
-            return pd.read_csv(file_path)
-        except Exception as e:
-            raise CustomException(e, sys)
+            train = self.read_data(self.data_ingestion_artifact.train_file_path)
+            test = self.read_data(self.data_ingestion_artifact.test_file_path)
 
-    # -------------------------------
-    # Validate number of columns
-    # -------------------------------
-    def validate_number_of_columns(self, dataframe: DataFrame) -> bool:
-        try:
-            expected_cols = len(self._schema_config["columns"].keys())
-            actual_cols = len(dataframe.columns)
+            # 🔥 Normalize column names
+            train.columns = train.columns.str.strip().str.lower()
+            test.columns = test.columns.str.strip().str.lower()
 
-            status = expected_cols == actual_cols
-            logging.info(f"Expected cols: {expected_cols}, Actual cols: {actual_cols}")
-            logging.info(f"Column count validation status: {status}")
+            # 🔥 FIX dtype (age column)
+            train["what is your age?"] = pd.to_numeric(train["what is your age?"], errors="coerce")
+            test["what is your age?"] = pd.to_numeric(test["what is your age?"], errors="coerce")
 
-            return status
-        except Exception as e:
-            raise CustomException(e, sys)
+            train["what is your age?"] = pd.to_numeric(train["what is your age?"], errors="coerce")
+            test["what is your age?"] = pd.to_numeric(test["what is your age?"], errors="coerce")
+            train["what is your age?"] = train["what is your age?"].fillna(train["what is your age?"].median())
+            test["what is your age?"] = test["what is your age?"].fillna(test["what is your age?"].median())
 
-    # -------------------------------
-    # Validate column existence
-    # -------------------------------
-    def is_column_exist(self, df: DataFrame) -> bool:
-        try:
-            dataframe_columns = df.columns
+            # 🔥 categorical fill (only object columns)
+            cat_cols = train.select_dtypes(include=["object"]).columns
 
-            missing_numerical = [
-                col for col in self._schema_config["numerical_columns"]
-                if col not in dataframe_columns
-            ]
+            train[cat_cols] = train[cat_cols].fillna("unknown")
+            test[cat_cols] = test[cat_cols].fillna("unknown")
 
-            missing_categorical = [
-                col for col in self._schema_config["categorical_columns"]
-                if col not in dataframe_columns
-            ]
+        
 
-            if missing_numerical:
-                logging.info(f"Missing numerical columns: {missing_numerical}")
+            # 🔥 numeric missing fix
+            train["what is your age?"] = train["what is your age?"].fillna(train["what is your age?"].median())
+            test["what is your age?"] = test["what is your age?"].fillna(test["what is your age?"].median())
 
-            if missing_categorical:
-                logging.info(f"Missing categorical columns: {missing_categorical}")
+            # 🔥 Drop unwanted columns
+            drop_cols = self._schema_config.get("drop_columns", [])
+            train = train.drop(columns=drop_cols, errors="ignore")
+            test = test.drop(columns=drop_cols, errors="ignore")
 
-            return not (missing_numerical or missing_categorical)
+            error = ""
 
-        except Exception as e:
-            raise CustomException(e, sys)
+            # Column validation
+            if not self.validate_columns(train):
+                error += "column mismatch "
 
-    # -------------------------------
-    # Detect data drift (simple version)
-    # -------------------------------
-    def detect_dataset_drift(self, reference_df: DataFrame, current_df: DataFrame) -> bool:
-        try:
-            drift_report = {}
+            # dtype validation
+            if not self.validate_dtypes(train):
+                error += "dtype mismatch "
 
-            for col in reference_df.columns:
-                if col in current_df.columns and reference_df[col].dtype != "object":
-                    ref_mean = reference_df[col].mean()
-                    curr_mean = current_df[col].mean()
+            # Missing values (only warning now)
+            if train.isnull().sum().sum() > 0:
+                logging.warning("Missing values found but handled")
 
-                    drift = abs(ref_mean - curr_mean)
+            validation_status = len(error) == 0
 
-                    drift_report[col] = {
-                        "reference_mean": float(ref_mean),
-                        "current_mean": float(curr_mean),
-                        "drift": float(drift)
-                    }
-
-            # save report
-            os.makedirs(
-                os.path.dirname(self.data_validation_config.drift_report_file_path),
-                exist_ok=True
-            )
-
-            write_yaml_file(
-                file_path=self.data_validation_config.drift_report_file_path,
-                content=drift_report
-            )
-
-            logging.info("Drift report saved")
-
-            # simple rule: drift detected if any column diff > threshold
-            drift_detected = any(v["drift"] > 0.1 for v in drift_report.values())
-
-            return drift_detected
-
-        except Exception as e:
-            raise CustomException(e, sys)
-
-    # -------------------------------
-    # Main function
-    # -------------------------------
-    def initiate_data_validation(self) -> DataValidationArtifact:
-        try:
-            logging.info("Starting data validation")
-
-            train_df = self.read_data(
-                file_path=self.data_ingestion_artifact.train_file_path
-            )
-
-            test_df = self.read_data(
-                file_path=self.data_ingestion_artifact.test_file_path
-            )
-
-            error_message = ""
-
-            # 1. Column count check
-            if not self.validate_number_of_columns(train_df):
-                error_message += "Train dataframe column mismatch. "
-
-            if not self.validate_number_of_columns(test_df):
-                error_message += "Test dataframe column mismatch. "
-
-            # 2. Column existence check
-            if not self.is_column_exist(train_df):
-                error_message += "Missing columns in train data. "
-
-            if not self.is_column_exist(test_df):
-                error_message += "Missing columns in test data. "
-
-            validation_status = len(error_message) == 0
-
-            # 3. Drift check (only if validation ok)
+            # Drift check
             if validation_status:
-                drift_status = self.detect_dataset_drift(train_df, test_df)
+                drift = self.detect_drift(train, test)
+                if drift:
+                    error += "data drift detected "
 
-                if drift_status:
-                    error_message = "Data drift detected"
-                else:
-                    error_message = "No data drift detected"
-
-            logging.info(f"Validation status: {validation_status}")
-            logging.info(f"Message: {error_message}")
-
-            artifact = DataValidationArtifact(
+            return DataValidationArtifact(
                 validation_status=validation_status,
-                message=error_message,
+                message=error,
                 drift_report_file_path=self.data_validation_config.drift_report_file_path
             )
-
-            return artifact
 
         except Exception as e:
             raise CustomException(e, sys)
