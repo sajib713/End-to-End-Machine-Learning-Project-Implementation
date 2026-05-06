@@ -1,0 +1,235 @@
+# youthmigration.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youth Migration Prediction</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to right, #141e30, #243b55);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 36px;
+        }
+
+        p {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #d1d1d1;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        button {
+            grid-column: span 2;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: #00c6ff;
+            background: linear-gradient(to right, #0072ff, #00c6ff);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            background: rgba(255,255,255,0.1);
+        }
+
+        @media(max-width: 768px) {
+            form {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width,
+            button {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Youth Migration Prediction</h1>
+    <p>Predict whether a youth is likely to move abroad based on survey information.</p>
+
+    <form action="/" method="POST">
+
+        <div>
+            <label>Age Group</label>
+            <select name="age" required>
+                <option value="18-24">18-24</option>
+                <option value="25-34">25-34</option>
+                <option value="35-44">35-44</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Gender</label>
+            <select name="gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Occupation</label>
+            <input type="text" name="occupation" placeholder="Student / Job Holder" required>
+        </div>
+
+        <div>
+            <label>Family Abroad</label>
+            <select name="family_abroad" required>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Aware of Migration Programs</label>
+            <select name="aware_programs" required>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Migration Trend Increased?</label>
+            <select name="migration_trend" required>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Will Return to Bangladesh?</label>
+            <select name="return_plan" required>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Family Impact</label>
+            <select name="family_impact" required>
+                <option value="Positive">Positive</option>
+                <option value="Negative">Negative</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Government Support</label>
+            <select name="govt_support" required>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Family Responsibility</label>
+            <select name="responsibility" required>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Recommendation Score (1-5)</label>
+            <input type="number" name="recommend_score" min="1" max="5" required>
+        </div>
+
+        <div>
+            <label>Stress Score (1-10)</label>
+            <input type="number" name="stress_score" min="1" max="10" required>
+        </div>
+
+        <div class="full-width">
+            <label>Interested Country Count</label>
+            <input type="number" name="country_count" min="1" max="20" required>
+        </div>
+
+        <button type="submit">Predict</button>
+
+    </form>
+
+    {% if context %}
+    <div class="result">
+        Prediction Result: {{ context }}
+    </div>
+    {% endif %}
+
+</div>
+
+</body>
+</html>
+```
