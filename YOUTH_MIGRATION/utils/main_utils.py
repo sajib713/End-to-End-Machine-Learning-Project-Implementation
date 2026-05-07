@@ -6,8 +6,8 @@ import dill
 import yaml
 from pandas import DataFrame
 
-from YOUTH_MIGRATION.exception import CustomException
-from YOUTH_MIGRATION.logger import logging
+from youth_migration.exception import CustomException
+from youth_migration.logger import logging
 
 
 # -------------------------------

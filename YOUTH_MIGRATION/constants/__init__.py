@@ -4,13 +4,13 @@ from datetime import date
 # -------------------------------
 # Basic Project Info
 # -------------------------------
-DATABASE_NAME = "YOUTH_MIGRATION"
+DATABASE_NAME = "youth_migration"
 
 COLLECTION_NAME = "migration_data"
 
 MONGODB_URL_KEY = "MONGODB_URL"
 
-PIPELINE_NAME: str = "YOUTH_MIGRATION"
+PIPELINE_NAME: str = "youth_migration"
 ARTIFACT_DIR: str = "artifact"
 
 MODEL_FILE_NAME = "model.pkl"

@@ -12,12 +12,12 @@ from uvicorn import run as app_run
 
 from typing import Optional
 
-from YOUTH_MIGRATION.constants import APP_HOST, APP_PORT
-from YOUTH_MIGRATION.pipeline.prediction_pipeline import (
+from youth_migration.constants import APP_HOST, APP_PORT
+from youth_migration.pipeline.prediction_pipeline import (
     MigrationData,
     MigrationClassifier
 )
-from YOUTH_MIGRATION.pipeline.training_pipeline import TrainingPipeline
+from youth_migration.pipeline.training_pipeline import TrainingPipeline
 
 
 # -----------------------------------

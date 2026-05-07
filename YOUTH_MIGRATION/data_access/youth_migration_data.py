@@ -1,6 +1,6 @@
-from YOUTH_MIGRATION.configuration.mongo_db_connection import MongoDBClient
-from YOUTH_MIGRATION.constants import DATABASE_NAME
-from YOUTH_MIGRATION.exception import CustomException
+from youth_migration.configuration.mongo_db_connection import MongoDBClient
+from youth_migration.constants import DATABASE_NAME
+from youth_migration.exception import CustomException
 
 import pandas as pd
 import sys

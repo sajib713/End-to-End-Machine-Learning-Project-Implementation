@@ -1,5 +1,5 @@
 import os
-from YOUTH_MIGRATION.constants import *
+from youth_migration.constants import *
 from dataclasses import dataclass
 from datetime import datetime
 

@@ -4,11 +4,11 @@ import re
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
 
-from YOUTH_MIGRATION.exception import CustomException
-from YOUTH_MIGRATION.logger import logging
-from YOUTH_MIGRATION.utils.main_utils import read_yaml_file, write_yaml_file
-from YOUTH_MIGRATION.entity.artifact_entity import DataValidationArtifact
-from YOUTH_MIGRATION.constants import SCHEMA_FILE_PATH
+from youth_migration.exception import CustomException
+from youth_migration.logger import logging
+from youth_migration.utils.main_utils import read_yaml_file, write_yaml_file
+from youth_migration.entity.artifact_entity import DataValidationArtifact
+from youth_migration.constants import SCHEMA_FILE_PATH
 
 
 class DataValidation:

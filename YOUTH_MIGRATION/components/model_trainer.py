@@ -13,24 +13,24 @@ from sklearn.metrics import (
 from sklearn.neighbors import KNeighborsClassifier
 from scipy.sparse import issparse
 
-from YOUTH_MIGRATION.exception import CustomException
-from YOUTH_MIGRATION.logger import logging
+from youth_migration.exception import CustomException
+from youth_migration.logger import logging
 
-from YOUTH_MIGRATION.utils.main_utils import (
+from youth_migration.utils.main_utils import (
     load_numpy_array_data,
     load_object,
     save_object,
     read_yaml_file
 )
 
-from YOUTH_MIGRATION.entity.config_entity import ModelTrainerConfig
-from YOUTH_MIGRATION.entity.artifact_entity import (
+from youth_migration.entity.config_entity import ModelTrainerConfig
+from youth_migration.entity.artifact_entity import (
     DataTransformationArtifact,
     ModelTrainerArtifact,
     ClassificationMetricArtifact
 )
 
-from YOUTH_MIGRATION.entity.estimator import MigrationModel
+from youth_migration.entity.estimator import MigrationModel
 
 
 class ModelTrainer:
