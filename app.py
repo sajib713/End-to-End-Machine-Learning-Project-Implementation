@@ -12,12 +12,12 @@ from uvicorn import run as app_run
 
 from typing import Optional
 
-from youth_migration.constants import APP_HOST, APP_PORT
-from youth_migration.pipeline.prediction_pipeline import (
+from YOUTH_MIGRATION.constants import APP_HOST, APP_PORT
+from YOUTH_MIGRATION.pipeline.prediction_pipeline import (
     MigrationData,
     MigrationClassifier
 )
-from youth_migration.pipeline.training_pipeline import TrainingPipeline
+from YOUTH_MIGRATION.pipeline.training_pipeline import TrainingPipeline
 
 
 # -----------------------------------
@@ -95,9 +95,6 @@ class DataForm:
         self.country_count = int(form.get("country_count"))
 
 
-# -----------------------------------
-# Home Route
-# -----------------------------------
 @app.get("/")
 async def home(request: Request):
 
@@ -110,9 +107,6 @@ async def home(request: Request):
     )
 
 
-# -----------------------------------
-# Training Route
-# -----------------------------------
 @app.get("/train")
 async def train_route():
 
@@ -129,9 +123,6 @@ async def train_route():
         return Response(f"Error Occurred: {e}")
 
 
-# -----------------------------------
-# Prediction Route
-# -----------------------------------
 @app.post("/")
 async def predict_route(request: Request):
 
@@ -187,9 +178,6 @@ async def predict_route(request: Request):
         )
 
 
-# -----------------------------------
-# Main
-# -----------------------------------
 if __name__ == "__main__":
 
     app_run(
