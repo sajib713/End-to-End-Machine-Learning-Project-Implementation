@@ -1,10 +1,13 @@
 artifact
 venv
 env
+.git
 .gitignore
 logs
 template.py
 demo.py
 README.md
 LICENSE
-notebook
+__pycache__
+*.pyc
+notebooks
