@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . /app
 
-ENV PYTHONPATH="${PYTHONPATH}:/app"
+ENV PYTHONPATH=/app
 
 RUN pip install --upgrade pip
 
@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 
 EXPOSE 8080
 
-CMD ["python3", "app.py"]
+CMD ["python3", "-m", "app"]
