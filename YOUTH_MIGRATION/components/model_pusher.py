@@ -1,14 +1,14 @@
 import sys
 
-from youth_migration.cloud_storage.aws_storage import SimpleStorageService
-from youth_migration.exception import CustomException
-from youth_migration.logger import logging
-from youth_migration.entity.artifact_entity import (
+from YOUTH_MIGRATION.cloud_storage.aws_storage import SimpleStorageService
+from YOUTH_MIGRATION.exception import CustomException
+from YOUTH_MIGRATION.logger import logging
+from YOUTH_MIGRATION.entity.artifact_entity import (
     ModelPusherArtifact,
     ModelEvaluationArtifact
 )
-from youth_migration.entity.config_entity import ModelPusherConfig
-from youth_migration.entity.s3_estimator import MigrationEstimator
+from YOUTH_MIGRATION.entity.config_entity import ModelPusherConfig
+from YOUTH_MIGRATION.entity.s3_estimator import MigrationEstimator
 
 
 class ModelPusher:

@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from youth_migration.exception import CustomException
-from youth_migration.logger import logging
-from youth_migration.constants import DATABASE_NAME, MONGODB_URL_KEY
+from YOUTH_MIGRATION.exception import CustomException
+from YOUTH_MIGRATION.logger import logging
+from YOUTH_MIGRATION.constants import DATABASE_NAME, MONGODB_URL_KEY
 
 
 class MongoDBClient:

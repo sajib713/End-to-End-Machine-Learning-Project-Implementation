@@ -1,6 +1,6 @@
 import boto3
 import os
-from youth_migration.constants import AWS_SECRET_ACCESS_KEY_ENV_KEY, AWS_ACCESS_KEY_ID_ENV_KEY,REGION_NAME
+from YOUTH_MIGRATION.constants import AWS_SECRET_ACCESS_KEY_ENV_KEY, AWS_ACCESS_KEY_ID_ENV_KEY,REGION_NAME
 
 
 class S3Client:

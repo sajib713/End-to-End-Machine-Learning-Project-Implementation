@@ -4,11 +4,11 @@ import sys
 from pandas import DataFrame
 from sklearn.model_selection import train_test_split
 
-from youth_migration.entity.config_entity import DataIngestionConfig
-from youth_migration.entity.artifact_entity import DataIngestionArtifact
-from youth_migration.exception import CustomException
-from youth_migration.logger import logging
-from youth_migration.data_access.youth_migration_data import YouthMigrationData
+from YOUTH_MIGRATION.entity.config_entity import DataIngestionConfig
+from YOUTH_MIGRATION.entity.artifact_entity import DataIngestionArtifact
+from YOUTH_MIGRATION.exception import CustomException
+from YOUTH_MIGRATION.logger import logging
+from YOUTH_MIGRATION.data_access.YOUTH_MIGRATION_data import YouthMigrationData
 
 
 class DataIngestion:

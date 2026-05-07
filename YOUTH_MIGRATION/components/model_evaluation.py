@@ -3,16 +3,16 @@ import pandas as pd
 from typing import Optional
 from dataclasses import dataclass
 
-from youth_migration.entity.config_entity import ModelEvaluationConfig
+from YOUTH_MIGRATION.entity.config_entity import ModelEvaluationConfig
 
-from youth_migration.entity.artifact_entity import (
+from YOUTH_MIGRATION.entity.artifact_entity import (
     ModelTrainerArtifact,
     DataIngestionArtifact,
     ModelEvaluationArtifact
 )
 
-from youth_migration.exception import CustomException
-from youth_migration.logger import logging
+from YOUTH_MIGRATION.exception import CustomException
+from YOUTH_MIGRATION.logger import logging
 
 
 # -----------------------------------

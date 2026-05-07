@@ -10,7 +10,7 @@ COLLECTION_NAME = "migration_data"
 
 MONGODB_URL_KEY = "MONGODB_URL"
 
-PIPELINE_NAME: str = "youth_migration"
+PIPELINE_NAME: str = "YOUTH_MIGRATION"
 ARTIFACT_DIR: str = "artifact"
 
 MODEL_FILE_NAME = "model.pkl"

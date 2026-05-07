@@ -1,7 +1,7 @@
 import os 
 from pathlib import Path
 
-project_name = "youth_migration"
+project_name = "YOUTH_MIGRATION"
 
 list_of_files = [
 

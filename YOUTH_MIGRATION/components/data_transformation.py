@@ -6,22 +6,22 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 
-from youth_migration.exception import CustomException
-from youth_migration.logger import logging
-from youth_migration.utils.main_utils import (
+from YOUTH_MIGRATION.exception import CustomException
+from YOUTH_MIGRATION.logger import logging
+from YOUTH_MIGRATION.utils.main_utils import (
     save_object,
     save_numpy_array_data,
     read_yaml_file,
     drop_columns
 )
 
-from youth_migration.entity.artifact_entity import (
+from YOUTH_MIGRATION.entity.artifact_entity import (
     DataTransformationArtifact,
     DataIngestionArtifact,
     DataValidationArtifact
 )
 
-from youth_migration.constants import SCHEMA_FILE_PATH
+from YOUTH_MIGRATION.constants import SCHEMA_FILE_PATH
 
 
 class DataTransformation:

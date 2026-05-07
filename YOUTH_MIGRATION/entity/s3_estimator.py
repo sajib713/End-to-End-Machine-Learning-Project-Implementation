@@ -1,9 +1,9 @@
 import sys
 from pandas import DataFrame
 
-from youth_migration.cloud_storage.aws_storage import SimpleStorageService
-from youth_migration.exception import CustomException
-from youth_migration.entity.estimator import MigrationModel
+from YOUTH_MIGRATION.cloud_storage.aws_storage import SimpleStorageService
+from YOUTH_MIGRATION.exception import CustomException
+from YOUTH_MIGRATION.entity.estimator import MigrationModel
 
 
 class MigrationEstimator:

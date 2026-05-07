@@ -2,8 +2,8 @@ import sys
 from pandas import DataFrame
 from sklearn.pipeline import Pipeline
 
-from youth_migration.exception import CustomException
-from youth_migration.logger import logging
+from YOUTH_MIGRATION.exception import CustomException
+from YOUTH_MIGRATION.logger import logging
 
 
 # -------------------------------

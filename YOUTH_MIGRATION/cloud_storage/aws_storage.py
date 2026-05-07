@@ -8,9 +8,9 @@ from pandas import DataFrame, read_csv
 from botocore.exceptions import ClientError
 from mypy_boto3_s3.service_resource import Bucket
 
-from youth_migration.configuration.aws_connection import S3Client
-from youth_migration.exception import CustomException
-from youth_migration.logger import logging
+from YOUTH_MIGRATION.configuration.aws_connection import S3Client
+from YOUTH_MIGRATION.exception import CustomException
+from YOUTH_MIGRATION.logger import logging
 
 
 class SimpleStorageService:

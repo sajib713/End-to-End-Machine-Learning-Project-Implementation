@@ -2,10 +2,10 @@ import sys
 import pandas as pd
 from pandas import DataFrame
 
-from youth_migration.entity.config_entity import MigrationPredictorConfig
-from youth_migration.entity.s3_estimator import MigrationEstimator
-from youth_migration.exception import CustomException
-from youth_migration.logger import logging
+from YOUTH_MIGRATION.entity.config_entity import MigrationPredictorConfig
+from YOUTH_MIGRATION.entity.s3_estimator import MigrationEstimator
+from YOUTH_MIGRATION.exception import CustomException
+from YOUTH_MIGRATION.logger import logging
 
 
 # -----------------------------------

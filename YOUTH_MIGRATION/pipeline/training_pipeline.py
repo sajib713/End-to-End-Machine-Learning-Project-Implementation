@@ -1,16 +1,16 @@
 import sys
 
-from youth_migration.exception import CustomException
-from youth_migration.logger import logging
+from YOUTH_MIGRATION.exception import CustomException
+from YOUTH_MIGRATION.logger import logging
 
-from youth_migration.components.data_ingestion import DataIngestion
-from youth_migration.components.data_validation import DataValidation
-from youth_migration.components.data_transformation import DataTransformation
-from youth_migration.components.model_trainer import ModelTrainer
-from youth_migration.components.model_evaluation import ModelEvaluation
-from youth_migration.components.model_pusher import ModelPusher
+from YOUTH_MIGRATION.components.data_ingestion import DataIngestion
+from YOUTH_MIGRATION.components.data_validation import DataValidation
+from YOUTH_MIGRATION.components.data_transformation import DataTransformation
+from YOUTH_MIGRATION.components.model_trainer import ModelTrainer
+from YOUTH_MIGRATION.components.model_evaluation import ModelEvaluation
+from YOUTH_MIGRATION.components.model_pusher import ModelPusher
 
-from youth_migration.entity.config_entity import (
+from YOUTH_MIGRATION.entity.config_entity import (
     DataIngestionConfig,
     DataValidationConfig,
     DataTransformationConfig,
@@ -19,7 +19,7 @@ from youth_migration.entity.config_entity import (
     ModelPusherConfig
 )
 
-from youth_migration.entity.artifact_entity import (
+from YOUTH_MIGRATION.entity.artifact_entity import (
     DataIngestionArtifact,
     DataValidationArtifact,
     DataTransformationArtifact,
