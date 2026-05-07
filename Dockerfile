@@ -2,13 +2,13 @@ FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-COPY . .
+COPY . /app
+
+ENV PYTHONPATH="${PYTHONPATH}:/app"
 
 RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
-
-RUN pip install .
 
 EXPOSE 8080
 
